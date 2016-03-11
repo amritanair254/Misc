@@ -1,0 +1,61 @@
+/*   
+1.    A Working Directory: where you'll be doing all the work: creating, editing, deleting and organizing files
+2.    A Staging Area: where you'll list changes you make to the working directory
+3.    A Repository: where Git permanently stores those changes as different versions of the project
+*/
+
+
+git init						//inititialize git
+vi scene-3.txt			//write a sonnet and :wq
+git add scene-3.txt
+vi scene-3.txt			//change a line and :wq
+git diff scene-3.txt	//shows difference in versions
+vi scene-7.txt			//write a soliloque and :wq
+
+git status					//shows whether you have files pending commitment or addition - shows status of stage and directory
+vi scene-7.txt			//make an error that you will undo afer commit
+git add scene-3.txt scene-5.txt	//can add multiple files
+git status					//will be different now
+
+git commit -m "Commiting scene 3 and 7"
+git log								//shows all previous commits
+vi scene-7.txt				//make an error that you will undo afer commit
+git add scene-7.txt		//now it is in staging area
+git reset HEAD scene-7.txt	//changes will be removed from staging area, but will still be intact in working dir
+
+
+
+git show HEAD				//current commit is HEAD. This command shows all commits and file changes made in HEAD
+
+vi scene-3.txt			//add some more changes and :wq
+git checkout scene-3.txt	//file will revert back to previous commit and recent directory edit will be lost for this file
+
+vi scene-7.txt			//make changes and :wq
+git add scene-7.txt
+git commit -m "this im going to revert later"
+git log							//to find the SHA which is unique alphanum identifier for every commit
+git reset 5d69206		//rewinds the previous commit whose SHA id is 5d69206. HEAD will now be the commit before this id
+
+/*
+The master and branches if any are identical: they share the same exact commit history. You can merge branches to master later*/
+git branch						//shows *master as branch
+git branch fencing		//made a new branch
+git branch						//fencing and *master, but it is still in master
+git checkout fencing	//to switch from master to fencing branch
+
+vi description.txt		//describe fencing and :wq
+git add description.txt
+git commit -m "added some description"
+
+
+
+
+
+
+
+
+
+
+
+
+
