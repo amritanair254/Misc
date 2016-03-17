@@ -1,0 +1,136 @@
+CREATE TABLE celebs(id INTEGER,name TEXT,age INTEGER);
+
+INSERT INTO celebs (id, name, age) VALUES (1, 'Justin Bieber', 21);
+INSERT INTO celebs (id, name, age) VALUES (2, 'Beyonce Knowles', 33); 
+INSERT INTO celebs (id, name, age) VALUES (3, 'Jeremy Lin', 26); 
+INSERT INTO celebs (id, name, age) VALUES (4, 'Taylor Swift', 26);
+
+SELECT * FROM celebs;		//shows all tables
+SELECT name FROM celebs;	//Just shows name column
+
+UPDATE celebs SET age = 22 WHERE id = 1; 		//change record
+SELECT * FROM celebs;
+
+ALTER TABLE celebs ADD COLUMN twitter_handle TEXT; 		//add a new column
+SELECT * FROM celebs;
+
+UPDATE celebs SET twitter_handle = '@taylorswift13' WHERE id = 4; 
+SELECT * FROM celebs;
+
+DELETE FROM celebs WHERE twitter_handle IS NULL;		//delete celebs rows where theres no twitter handle
+
+SELECT name,imdb_rating FROM movies;
+
+SELECT DISTINCT genre FROM movies;
+SELECT * FROM movies  WHERE imdb_rating > 8;
+SELECT * FROM movies WHERE name LIKE 'Se_en';			//shows seven and se7en
+SELECT * FROM movies WHERE name LIKE 'a%';				//everything that starts with A. %a selects all that ends with a
+SELECT * FROM movies WHERE name LIKE '%man%';			//everything that has a man in it
+SELECT * FROM movies WHERE name BETWEEN 'A' AND 'J';	//selects movies starting from A to J, inclusive
+SELECT * FROM movies WHERE year  BETWEEN 1990 AND 2000;	//selects between years inclusive
+SELECT * FROM movies WHERE genre IS 'comedy' AND year BETWEEN 1990 AND 2000; 
+SELECT * FROM movies WHERE genre IS 'comedy' OR year < 1980;
+
+SELECT * FROM movies ORDER BY imdb_rating DESC;
+SELECT * FROM movies ORDER BY imdb_rating ASC LIMIT 3;
+
+
+
+SELECT COUNT(*) FROM fake_apps;										//number of entries
+SELECT COUNT(*) FROM fake_apps WHERE price = 0;
+SELECT price, COUNT(*) FROM fake_apps GROUP BY price;				//histogram
+SELECT price, COUNT(*) FROM fake_apps WHERE downloads > 20000 GROUP BY price;
+SELECT SUM(downloads) FROM fake_apps;								//sums up all download items 
+SELECT category, SUM(downloads) FROM fake_apps GROUP BY category;	//sum all downloads by each category
+SELECT name, MAX(downloads) FROM fake_apps;								//most popular download
+SELECT name, category, MAX(downloads) FROM fake_apps GROUP BY category;	//most popular download for each category
+SELECT name, category, MIN(downloads) FROM fake_apps GROUP BY category;	//least popular
+SELECT AVG(downloads) FROM fake_apps;									//average number of apps downloaded
+SELECT price,ROUND(AVG(downloads),2) FROM fake_apps GROUP BY price;		//rounds precision by 2 digits
+SELECT price,ROUND(AVG(downloads)) FROM fake_apps GROUP BY price;		//rounds to nearest integer
+
+
+
+CREATE TABLE artists(id INTEGER PRIMARY KEY, name TEXT);
+
+SELECT * FROM artists WHERE id=3;
+SELECT * FROM albums WHERE artist_id=3;
+
+SELECT albums.name, albums.year, artists.name FROM albums, artists;
+SELECT * FROM albums JOIN artists ON albums.artist_id=artists.id;		//combine 2 or more tables with inner join
+SELECT * FROM albums LEFT JOIN artists ON albums.artist_id = artists.id;	//outer join do not require join condition to be met. Every row in albums table is returned in result set with null values in artists columns
+
+SELECT albums.name AS 'Album', albums.year, artists.name AS 'Artist' FROM albums JOIN artists ON albums.artist_id = artists.id WHERE albums.year > 1980;	//AS renames columns
+
+
+
+SELECT * FROM orders ORDER BY id LIMIT 100;		//shows the first 100 entries
+SELECT date(ordered_at) , COUNT(1) FROM orders GROUP BY 1 ORDER BY 1 ;		Convert date timestamp to dates only using date() casting
+//1 refers to 1 column of result which is date
+
+SELECT date(orders.ordered_at), ROUND(SUM(order_items.amount_paid),2) FROM orders JOIN order_items ON orders.id=order_items.order_id group by 1 order by 1;
+SELECT date(ordered_at), round(sum(amount_paid), 2) FROM orders   join order_items ON  orders.id = order_items.order_id where name = 'kale-smoothie' group by 1 order by 1;
+//revenue from kale-smoothie everyday. lets investigate why kale is so low
+
+SELECT name, round(sum(amount_paid), 2) FROM order_items group by name order by 2 desc;	//total revenue from each product
+SELECT name, round(sum(amount_paid) / (SELECT sum(amount_paid) from order_items) * 100.0,2) as pct from  order_items  group by 1 order by 2 desc;	//We have the sum of the the products by revenue, but we still need the percent of revenue of each product. For that, well need to get the total using a subquery 
+//subquery can perform complicated calculations and create filtered or aggregate tables
+
+
+select *, 
+case name
+when 'kale-smoothie' then 'smoothie' 
+when 'banana-smoothie' then 'smoothie' 
+when 'orange-juice' then 'drink' 
+when 'soda' then 'drink'
+when 'blt' then 'sandwich'
+when 'grilled-cheese' then 'sandwich'
+when 'tikka-masala' then 'dinner'
+when 'chicken-parm' then 'dinner'
+else 'other' end as category
+from order_items 
+order by id
+limit 100;
+//build your own category using case which is like if-else stmt
+
+
+select 
+case name
+when 'kale-smoothie' then 'smoothie' 
+when 'banana-smoothie' then 'smoothie' 
+when 'orange-juice' then 'drink' 
+when 'soda' then 'drink'
+when 'blt' then 'sandwich'
+when 'grilled-cheese' then 'sandwich'
+when 'tikka-masala' then 'dinner'
+when 'chicken-parm' then 'dinner'
+else 'other'   
+end as category, round(sum(amount_paid) /
+    (select sum(amount_paid) from order_items) * 100, 2) as pct
+from order_items
+group by 1
+order by 2 desc;
+//find which particular category isnt doing well
+
+
+select name, count(distinct order_id)
+from order_items 
+group by 1 
+order by 1;
+
+//distinct orders for different dishes
+
+
+//we'll create a metric called reorder rate and see how that compares to the other products at SpeedySpoon.
+//We'll define reorder rate as the ratio of the total number of orders to the number of people making those orders. A lower ratio means most of the orders are reorders. A higher ratio means more of the orders are first purchases.
+
+select name, round(1.0*count(distinct order_id) /
+                   count(distinct(orders.delivered_to)),2) as reorder_rate
+                   from order_items
+                   join orders on
+                   
+  orders.id = order_items.order_id
+group by 1
+order by 2 desc;
+
+//number of people making these orders. 
