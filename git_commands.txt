@@ -57,5 +57,40 @@ git commit -m "added some description"
 
 
 
+==================
+SOME STUFF===============
+
+
+
+git clone science-quizzes my-quizzes			//copies the git project locally. If you commit changes to my-quizzes, main author of science-quizzes(origin) will not know about it
+cd my-quizzes
+git remote -v									//lists remotes of origin (one for fetch, one for push)
+//after 3 days
+git fetch										//same as cvs update, fetch all updates made to the origin. This doesnt make changes to your local copy
+
+git log											//see all your commits
+git merge origin/master							//merge main author's commits with yours - fastforwarding
+git log											//see your and main author's commits
+
+
+/*
+The workflow for Git collaborations typically follows this order:
+
+    Fetch and merge changes from the remote
+    Create a branch to work on a new project feature
+    Develop the feature on your branch and commit your work
+    Fetch and merge from the remote again (in case new commits were made while you were working)
+    Push your branch up to the remote for review
+*/
+
+cd my-quizzes
+git branch bio-questions		//add branch that we will later merge
+git checkout bio-questions		
+vi biology.txt					//add some questions :wq
+git add biology.txt
+git commit -m "added bio questions"
+
+git push origin bio-questions	//now main author can review it before merging it with her copy
+
 
 
